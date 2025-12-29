@@ -1,24 +1,24 @@
 import { Link, useNavigate } from "react-router-dom";
-import { getCurrentUser, logout } from "../storage";
+import { useDispatch } from "react-redux";
+import { logout } from "../store/authSlice";
 
-export default function Navbar() {
-  const user = getCurrentUser();
+function Navbar() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
-  if (!user) return null; 
+  function handleLogout() {
+    dispatch(logout());
+    navigate("/login");
+  }
 
   return (
     <div>
       <Link to="/intake">Intake</Link>{" | "}
       <Link to="/list">List</Link>{" | "}
       <Link to="/diff">Diff</Link>{" | "}
-      <span>{user.username}</span>{" "}
       <button onClick={handleLogout}>Logout</button>
     </div>
   );
 }
+
+export default Navbar;

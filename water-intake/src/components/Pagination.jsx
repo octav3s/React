@@ -1,23 +1,13 @@
-export default function Pagination({ page, setPage, total }) {
+function Pagination({ page, setPage, total, perPage }) {
+  const totalPages = Math.ceil(total / perPage);
+
   return (
     <div>
-      <button
-        disabled={page === 1}
-        onClick={() => setPage(page - 1)}
-      >
-        Prev
-      </button>
-
-      <span style={{ margin: "0 10px" }}>
-        Page {page}
-      </span>
-
-      <button
-        disabled={page * 5 >= total}
-        onClick={() => setPage(page + 1)}
-      >
-        Next
-      </button>
+      <button disabled={page === 1} onClick={() => setPage(page - 1)}>Prev</button>
+      <span> Page {page} of {totalPages} </span>
+      <button disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</button>
     </div>
   );
 }
+
+export default Pagination;

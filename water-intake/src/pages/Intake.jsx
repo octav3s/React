@@ -1,40 +1,50 @@
 import { useState } from "react";
-import { getCurrentUser, getUsers, setUsers } from "../storage";
+import { useSelector } from "react-redux";
 import Navbar from "../components/Navbar";
 
-export default function Intake() {
-  const user = getCurrentUser();
+function Intake() {
   const [amount, setAmount] = useState("");
+  const [message, setMessage] = useState("");
+  const email = useSelector(state => state.auth.email);
 
-  if (!user) return <div>Please login</div>;
+  function addIntake() {
+    const data = JSON.parse(localStorage.getItem("water_intakes")) || {};
+    const list = data[email] || [];
+    const today = new Date().toISOString().split("T")[0];
 
-  const today = new Date().toISOString().split("T")[0];
-
-  const addIntake = () => {
-    const users = getUsers();
-    const u = users.find(x => x.email === user.email);
-
-    if (u.intakes.find(i => i.date === today)) {
-      alert("Only one entry per day allowed");
+    if (list.find(i => i.date === today)) {
+      setMessage("Only one entry per day allowed");
       return;
     }
 
-    u.intakes.push({ date: today, amount: Number(amount) });
-    setUsers(users);
-  };
+    list.push({ date: today, amount: Number(amount) });
+    data[email] = list;
+    localStorage.setItem("water_intakes", JSON.stringify(data));
+
+    setMessage("Intake added");
+    setAmount("");
+  }
 
   return (
     <div>
       <Navbar />
-      <h2>Welcome, {user.username}</h2>
+      <h2>Add Intake</h2>
+      {message && <div>{message}</div>}
 
-      <input
-        type="number"
-        placeholder="Water in ml"
-        onChange={e => setAmount(e.target.value)}
-      />
+      <div>
+        <input
+          type="number"
+          value={amount}
+          onChange={e => setAmount(e.target.value)}
+        />
+        <span style={{ marginLeft: "6px" }}>ml</span>
+      </div>
 
-      <button onClick={addIntake}>Add Intake</button>
+      <div>
+        <button onClick={addIntake}>Add</button>
+      </div>
     </div>
   );
 }
+
+export default Intake;

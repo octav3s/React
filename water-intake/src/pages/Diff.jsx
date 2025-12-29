@@ -1,28 +1,33 @@
 import { useState } from "react";
-import { getCurrentUser } from "../storage";
+import { useSelector } from "react-redux";
 import Navbar from "../components/Navbar";
 
-export default function Diff() {
-  const user = getCurrentUser();
+function Diff() {
+  const email = useSelector(state => state.auth.email);
   const [d1, setD1] = useState("");
   const [d2, setD2] = useState("");
+  const [diff, setDiff] = useState(null);
 
-  if (!user) return <div>Please login</div>;
+  function calculate() {
+    const data = JSON.parse(localStorage.getItem("water_intakes")) || {};
+    const list = data[email] || [];
 
-  const getAmount = date =>
-    user.intakes.find(i => i.date === date)?.amount || 0;
+    const a1 = list.find(i => i.date === d1)?.amount || 0;
+    const a2 = list.find(i => i.date === d2)?.amount || 0;
+
+    setDiff(Math.abs(a1 - a2));
+  }
 
   return (
     <div>
       <Navbar />
-      <h2>Water Intake Difference</h2>
-
+      <h2>Difference</h2>
       <input type="date" onChange={e => setD1(e.target.value)} />
       <input type="date" onChange={e => setD2(e.target.value)} />
-
-      <p>
-        Difference: {Math.abs(getAmount(d1) - getAmount(d2))} ml
-      </p>
+      <button onClick={calculate}>Calculate</button>
+      {diff !== null && <div>Difference: {diff} ml</div>}
     </div>
   );
 }
+
+export default Diff;

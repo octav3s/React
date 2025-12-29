@@ -1,48 +1,53 @@
+import axios from "axios";
 import { useState } from "react";
-import { getUsers, setCurrentUser } from "../storage";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { loginSuccess } from "../store/authSlice";
 
-export default function Login() {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    const user = getUsers().find(
-      u => u.email === email && u.password === password
-    );
-
-    if (!user) {
-      alert("Invalid credentials");
-      return;
-    }
-
-    setCurrentUser(user);
-    navigate("/dashboard");
-  };
+  function attemptLogin() {
+    axios.post("https://demo-blog.mashupstack.com/api/login", {
+      email,
+      password
+    })
+    .then(response => {
+      dispatch(loginSuccess({ token: response.data.token, email }));
+      navigate("/intake");
+    })
+    .catch(() => setErrorMessage("Invalid credentials"));
+  }
 
   return (
-    <div>
+    <div className="container">
       <h2>Login</h2>
 
+      {errorMessage && <div>{errorMessage}</div>}
+
       <div>
-        <input
-          placeholder="Email"
-          onChange={e => setEmail(e.target.value)}
-        />
+        <label>Email</label><br />
+        <input type="text" value={email} onChange={e => setEmail(e.target.value)} />
       </div>
 
       <div>
+        <label>Password</label><br />
         <input
           type="password"
-          placeholder="Password"
+          value={password}
           onChange={e => setPassword(e.target.value)}
         />
       </div>
 
-      <div>
-        <button onClick={handleLogin}>Login</button>
+      <div style={{ marginTop: "10px" }}>
+        <button onClick={attemptLogin}>Login</button>
       </div>
     </div>
   );
 }
+
+export default Login;
